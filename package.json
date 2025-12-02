@@ -1,0 +1,27 @@
+{
+  "name": "preview",
+  "version": "1.0.0",
+  "description": "App Store screenshot tool using Playwright",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/index.ts",
+    "kernel": "tsx src/kernel/appStorePreview.ts",
+    "test": "tsx src/test.ts"
+  },
+  "keywords": [
+    "playwright",
+    "screenshots",
+    "app-store"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^20.19.25",
+    "dotenv": "^16.6.1",
+    "playwright": "^1.57.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
