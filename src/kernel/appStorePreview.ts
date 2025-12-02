@@ -153,5 +153,8 @@ async function main() {
   }
 }
 
-// Run if executed directly
-main();
+// Run if executed directly (not imported as a module)
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
+  main();
+}

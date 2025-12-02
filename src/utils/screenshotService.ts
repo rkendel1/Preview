@@ -1,6 +1,7 @@
 import { chromium, type Browser, type Page } from "playwright";
 import * as fs from "fs";
 import * as path from "path";
+import * as crypto from "crypto";
 
 /**
  * App Store device screenshot sizes and specifications
@@ -108,7 +109,8 @@ export class ScreenshotService {
         // Additional wait time for dynamic content
         await page.waitForTimeout(waitTime);
 
-        const fileName = `${deviceSpec.name}_${Date.now()}.png`;
+        const uniqueId = `${Date.now()}_${crypto.randomBytes(4).toString("hex")}`;
+        const fileName = `${deviceSpec.name}_${uniqueId}.png`;
         const filePath = path.join(outputDir, fileName);
 
         await page.screenshot({
