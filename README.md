@@ -1,6 +1,6 @@
 # Preview
 
-App Store Screenshot and Icon Generation Tool using Playwright and OpenAI.
+App Store Screenshot Tool using Playwright.
 
 ## Overview
 
@@ -8,7 +8,6 @@ This tool provides a kernel job that:
 1. Opens Playwright browser and navigates to a specified URL
 2. Takes screenshots in various App Store device sizes (iPhone & iPad)
 3. Extracts app information from the page
-4. Generates app icons using OpenAI's DALL-E
 
 ## Installation
 
@@ -22,9 +21,6 @@ npx playwright install chromium
 Create a `.env` file with the following variables:
 
 ```env
-# Required for icon generation
-OPENAI_API_KEY=your_openai_api_key
-
 # App configuration
 APP_URL=https://your-app-url.com
 APP_NAME=Your App Name
@@ -38,11 +34,6 @@ OUTPUT_DIR=./output
 # Screenshot options
 FULL_PAGE=false
 WAIT_TIME=2000
-
-# Icon options
-ICON_STYLE=gradient  # flat, 3d, gradient, minimal
-PRIMARY_COLOR=blue
-GENERATE_VARIATIONS=false
 ```
 
 ## Usage
@@ -76,11 +67,6 @@ const result = await runAppStorePreviewJob({
     fullPage: false,
     waitTime: 2000,
   },
-  iconOptions: {
-    style: "gradient",
-    primaryColor: "blue",
-    generateVariations: false,
-  },
 });
 ```
 
@@ -98,7 +84,6 @@ const result = await runAppStorePreviewJob({
 
 The job generates:
 - Screenshots in the `screenshots/` subdirectory
-- App icon(s) in the `icons/` subdirectory
 - A `manifest.json` file with all metadata
 
 ## Development

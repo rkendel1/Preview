@@ -2,7 +2,6 @@ import "dotenv/config";
 import * as fs from "fs";
 import * as path from "path";
 import { ScreenshotService, type DeviceType, APP_STORE_DEVICES, type AppInfo } from "../utils/screenshotService.js";
-import { IconGenerationService, type IconGenerationOptions } from "../utils/iconGenerationService.js";
 
 /**
  * Configuration for the App Store Preview Kernel job
@@ -11,7 +10,7 @@ export interface AppStorePreviewConfig {
   // URL to capture screenshots from
   url: string;
 
-  // App information for icon generation
+  // App information
   appInfo: {
     name: string;
     description: string;
@@ -19,7 +18,7 @@ export interface AppStorePreviewConfig {
     keywords?: string[] | undefined;
   };
 
-  // Output directory for screenshots and icons
+  // Output directory for screenshots
   outputDir?: string | undefined;
 
   // Device types for screenshots (defaults to all)
@@ -30,13 +29,6 @@ export interface AppStorePreviewConfig {
     fullPage?: boolean | undefined;
     waitForSelector?: string | undefined;
     waitTime?: number | undefined;
-  } | undefined;
-
-  // Icon generation options
-  iconOptions?: {
-    style?: IconGenerationOptions["style"] | undefined;
-    primaryColor?: string | undefined;
-    generateVariations?: boolean | undefined;
   } | undefined;
 }
 
@@ -50,16 +42,6 @@ export interface AppStorePreviewResult {
     width: number;
     height: number;
   }>;
-  icon?: {
-    filePath: string;
-    prompt: string;
-    revisedPrompt?: string | undefined;
-  } | undefined;
-  iconVariations?: Array<{
-    filePath: string;
-    prompt: string;
-    revisedPrompt?: string | undefined;
-  }> | undefined;
   appInfo: AppInfo;
   timestamp: string;
 }
@@ -71,7 +53,6 @@ export interface AppStorePreviewResult {
  * 2. Navigates to the specified URL
  * 3. Takes screenshots in various App Store sizes
  * 4. Extracts app information
- * 5. Generates app icon using OpenAI
  */
 export async function runAppStorePreviewJob(
   config: AppStorePreviewConfig
@@ -82,18 +63,15 @@ export async function runAppStorePreviewJob(
 
   const outputDir = config.outputDir || path.join(process.cwd(), "output");
   const screenshotDir = path.join(outputDir, "screenshots");
-  const iconDir = path.join(outputDir, "icons");
 
   // Ensure output directories exist
-  [outputDir, screenshotDir, iconDir].forEach((dir) => {
+  [outputDir, screenshotDir].forEach((dir) => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
   });
 
   const screenshotService = new ScreenshotService();
-  const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
-  const iconService = hasOpenAIKey ? new IconGenerationService() : null;
 
   try {
     // Initialize browser
@@ -122,47 +100,9 @@ export async function runAppStorePreviewJob(
       screenshotPaths: screenshots.map((s) => s.filePath),
     };
 
-    // Generate app icon using OpenAI
-    console.log("\n🎨 Generating app icon with OpenAI...");
-    let icon;
-    let iconVariations;
-
-    if (iconService) {
-      try {
-        const baseIconOptions = {
-          appName: appInfo.name,
-          appDescription: appInfo.description,
-          category: appInfo.category,
-          keywords: appInfo.keywords,
-          outputDir: iconDir,
-        };
-
-        if (config.iconOptions?.generateVariations) {
-          iconVariations = await iconService.generateIconVariations({
-            ...baseIconOptions,
-            style: config.iconOptions.style ?? "gradient",
-            ...(config.iconOptions.primaryColor && { primaryColor: config.iconOptions.primaryColor }),
-          });
-          icon = iconVariations[0];
-        } else {
-          icon = await iconService.generateIcon({
-            ...baseIconOptions,
-            style: config.iconOptions?.style ?? "gradient",
-            ...(config.iconOptions?.primaryColor && { primaryColor: config.iconOptions.primaryColor }),
-          });
-        }
-      } catch (error) {
-        console.warn("⚠️ Icon generation failed:", error);
-      }
-    } else {
-      console.warn("⚠️ OPENAI_API_KEY not set. Skipping icon generation.");
-    }
-
     // Create result summary
     const result: AppStorePreviewResult = {
       screenshots,
-      icon,
-      iconVariations,
       appInfo,
       timestamp: new Date().toISOString(),
     };
@@ -174,7 +114,6 @@ export async function runAppStorePreviewJob(
 
     console.log("\n✅ App Store Preview Job completed successfully!");
     console.log(`   - Screenshots captured: ${screenshots.length}`);
-    console.log(`   - Icon generated: ${icon ? "Yes" : "No"}`);
     console.log(`   - Output directory: ${outputDir}`);
 
     return result;
@@ -201,11 +140,6 @@ async function main() {
     screenshotOptions: {
       fullPage: process.env.FULL_PAGE === "true",
       waitTime: parseInt(process.env.WAIT_TIME || "2000"),
-    },
-    iconOptions: {
-      style: (process.env.ICON_STYLE as IconGenerationOptions["style"]) || "gradient",
-      primaryColor: process.env.PRIMARY_COLOR,
-      generateVariations: process.env.GENERATE_VARIATIONS === "true",
     },
   };
 

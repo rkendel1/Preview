@@ -2,11 +2,11 @@
  * Basic tests for the App Store Preview functionality
  */
 import { ScreenshotService, APP_STORE_DEVICES } from "./utils/screenshotService.js";
-import { IconGenerationService } from "./utils/iconGenerationService.js";
 import * as fs from "fs";
 import * as path from "path";
+import * as os from "os";
 
-const TEST_OUTPUT_DIR = "/tmp/preview-test-output";
+const TEST_OUTPUT_DIR = path.join(os.tmpdir(), "preview-test-output");
 
 async function testScreenshotService() {
   console.log("🧪 Testing Screenshot Service...");
@@ -72,21 +72,6 @@ function testDeviceConstants() {
   }
 }
 
-function testIconGenerationService() {
-  console.log("\n🧪 Testing Icon Generation Service...");
-
-  // Test service instantiation (without API key)
-  try {
-    const service = new IconGenerationService("test-key");
-    console.log("✅ Icon Generation Service instantiated");
-
-    // Note: Actual icon generation requires a valid OpenAI API key
-    console.log("⚠️ Skipping actual icon generation (requires OPENAI_API_KEY)");
-  } catch (error) {
-    console.error("❌ Icon Generation Service test failed:", error);
-  }
-}
-
 async function runTests() {
   console.log("🚀 Running App Store Preview Tests\n");
   console.log("=".repeat(50));
@@ -97,7 +82,6 @@ async function runTests() {
   }
 
   testDeviceConstants();
-  testIconGenerationService();
   await testScreenshotService();
 
   console.log("\n" + "=".repeat(50));

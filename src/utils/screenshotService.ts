@@ -1,4 +1,4 @@
-import { chromium, type Browser, type Page, devices } from "playwright";
+import { chromium, type Browser, type Page } from "playwright";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -165,7 +165,7 @@ export class ScreenshotService {
       const keywords = await page.$eval('meta[name="keywords"]', (el) => el.getAttribute("content")).catch(() => null);
 
       if (keywords) {
-        appInfo.keywords = keywords.split(",").map((k) => k.trim());
+        appInfo.keywords = keywords.split(",").map((k: string) => k.trim());
       }
 
       return appInfo;
